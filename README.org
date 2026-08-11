@@ -1,0 +1,54 @@
+#+author: RedVel
+#+name: README
+#+description: Some details about this repo.
+
+* About Redcomp
+Redcomp is a header-only library for making a build system, and is intended to be used in a project for its features which the core features it uses to make a build system are implemented with.
+
+** Redcomp Features
+***  Arrays
+Redcomp has a few array types it supports: dyanmic arrays, dynamic iterable arrays, array views, and iterable array views.
+
+Redcomp supports these array types through macros. You declare an array type at compile time (or embed it in another type you define) and use macros for inserting or reserving space with dynamic arrays, going to or peeking at an index in an iterable array, going or peeking backwards or forwards, or cutting an array (useful with array views) by advancing its pointer to the beginning of the array, and decrementing its count.
+
+*** Command-Line Argument Parsing
+Redcomp has a few types for parsing command-line arguments: RedcompFlag, RedcompFlags, and RedcompArgs.
+
+RedcompFlag represents a flag - a short name, a long name, a description, what type of value it holds, whether it was parsed, whether it is mandatory, what value it holds after parsing, which is set to the default value if it wasn't encountered.
+
+RedcompFlags is an array view of pointers of type RedcompFlag. This is so that you can declare the flags as variables, fill an array with them, parse arguments, and simply use them afterwards.
+
+RedcompArgs is an iterable array view of c-strings (const char *), for iterating over the arguments. This is because while boolean flags simply need a view so that it can be checked if they were present in the command-line arguments or not, other flags, such as a flag specifying some number, or a flag specifying an input or an output name, would need to safely access the next argument, and so RedcompArgs needs an iterator.
+
+*** Arena
+Redcomp implements its arena allocator through dynamic arrays. It uses the type RedcompRegion and the type RedcompArena to make its arena allocator work.
+
+RedcompRegion is a dynamic array of char. While it is a dynamic array, it is not intended to be used with the reserve macro after initialization. However, by being a dynamic array, it can support allocations rather simply. It can keep track of how much has been allocated with the member variable `count`, while keeping track of how much has been allocated with the member variable `reserved`.
+
+RedcompArena is a dynamic array of RedcompRegion. Because it is a dynamic array of RedcompRegion, it doesn't invalidate any of the pointers from RedcompRegion when calling realloc. And because it is a simple dynamic array, it is very fast to loop through it and find if any region is available for allocating, and if none is found, it simply inserts a new region, ensures it has enough memory, and uses that.
+
+*** Temporary Buffer
+Redcomp has a temporary buffer (global variable of type char []) of size REDCOMP_TEMPORARY_BUFFER_SIZE (set to 1024*16 by default, but is only set if the macro hasn't been defined, so that it can be modified at compile time if necessary), and a cursor (global variable of type u64). The temporary buffer is intended to be used for string formatting and intended to be used through functions - to modify the cursor, to get the cursor's current value, and to get a formatted string.
+
+*** String Types
+Redcomp provides a type RedcompString and a type RedcompStringView. RedcompString is a dynamic array of char, and RedcompStringView is an array view of char. Redcomp provides functions and macros to handle these types, such as:
+
+- Spreading the arguments of a RedcompString or a RedcompStringView for formatting (`%.*s`) e.g. in printf.
+- Reading from and writing to files.
+- Inserting a string (C-string or RedcompStringView), a number (u64), or inserting a formatted string.
+- Checking if a RedcompStringView starts with a string (C-String or RedcompStringView).
+- Making a RedcompStringView from an unsized C-string.
+- And various other things.
+
+*** File Time
+Redcomp provides a function and a macro to check when a file was last modified. Its interface is a bit odd, returning true if the file doesn't exist, but this is because it is intended to be used to check if a rebuild is necessary.
+
+*** Rebuild Check
+Redcomp provides functions and macros to check if a binary needs a rebuild.
+
+*** Standard Library Replacement
+Redcomp provides some functions and mcaros to replace some things provided by the standard library. For the most part, they don't work very well in comparison to what libc provides. However, Redcomp does provide functions and macros for assertions which can be more useful than what is provided by the standard library.
+
+* How To Use
+Redcomp is a header-only library, meaning you simply need to include it, and you're just about good to go. You may want to define some macros to customize its behavior, and you may want to define `REDCOMP_KEEP_PREFIXES` to avoid name collisions (you can keep undefined, however, if name collisions are not a concern), and you will need to define the macro `REDCOMP_IMPLEMENTATION` in some file, but that's just about all there is to consider.
+
