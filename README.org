@@ -7,7 +7,7 @@ Redcomp is a header-only library for making a build system, and is intended to b
 
 ** Redcomp Features
 ***  Arrays
-Redcomp has a few array types it supports: dyanmic arrays, dynamic iterable arrays, array views, and iterable array views.
+Redcomp has a few array types it supports: dynamic arrays, dynamic iterable arrays, array views, and iterable array views.
 
 Redcomp supports these array types through macros. You declare an array type at compile time (or embed it in another type you define) and use macros for inserting or reserving space with dynamic arrays, going to or peeking at an index in an iterable array, going or peeking backwards or forwards, or cutting an array (useful with array views) by advancing its pointer to the beginning of the array, and decrementing its count.
 
