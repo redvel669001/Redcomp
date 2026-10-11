@@ -170,15 +170,19 @@ typedef __uint64_t u64;
 
 #define redcomp_array_cut_once(array)           \
   do {                                          \
-    (array)->first++;                           \
-    (array)->count--;                           \
-  } while(0)
+    if ((array)->count > 0) {                   \
+      (array)->first++;                         \
+      (array)->count--;                         \
+    }                                           \
+  } while (0)
 
-#define redcomp_array_cut(array, count)         \
+#define redcomp_array_cut(array, cuts)          \
   do {                                          \
-    (array)->first += (count);                  \
-    (array)->count -= (count);                  \
-  } while(0)
+    if ((array)->count > (cuts)) {              \
+      (array)->first += (cuts);                 \
+      (array)->count -= (cuts);                 \
+    }                                           \
+  } while (0)
 
 /*
   ############################################################
@@ -460,12 +464,6 @@ RED_DEF void redcomp_memory_set(void *destination, u8 byte, u64 size);
 #define array_view_iter_make redcomp_array_view_iter_make
 
 #define ARRAY_LENGTH REDCOMP_ARRAY_LENGTH
-
-/*
-  ############################################################
-  ##################### ARRAY OPERATIONS #####################
-  ############################################################
-*/
 
 #define array_reserve redcomp_array_reserve
 #define array_insert redcomp_array_insert
@@ -1018,7 +1016,7 @@ RED_DEF void redcomp_temporary_buffer_cursor_set(u64 cursor) {
 */
 
 RED_DEF bool redcomp_string_read_from_file_function(const char *file_path, RedcompString *buffer, const char *file, i32 line) {
-  long file_size;
+  i64 file_size;
   FILE *input_file;
   input_file = fopen(file_path, "rb");
   if (input_file == (void *) 0) {
