@@ -5,6 +5,13 @@
 #include <sys/times.h>
 
 #define CFLAGS "-std=c89", "-Wall", "-Wextra", "-pedantic", "-Wduplicated-cond", "-Wduplicated-branches", "-Wlogical-op", "-Wnull-dereference", "-Wjump-misses-init", "-Wdouble-promotion", "-Wshadow", "-Wformat=2", "-Wformat-overflow=2", "-Wformat-truncation=2", "-Wformat-signedness", "-Winit-self", "-Wmissing-include-dirs", "-Wsync-nand", "-Wtrivial-auto-var-init", "-Wunused-const-variable=2", "-Wuse-after-free=3", "-Wstrict-flex-arrays", "-Walloc-zero", "-Wtrampolines", "-Wundef", "-Wunused-macros", "-Wbad-function-cast", "-Wcast-align", "-Wstrict-prototypes", "-Wold-style-definition", "-Wpacked", "-Wnested-externs", "-fstrict-flex-arrays", "-Wstrict-overflow=2", "-Wstringop-overflow=4", "-Warray-bounds=2", "-Warith-conversion", "-Wwrite-strings", "-Wdate-time", "-Wredundant-decls", "-Wrestrict", "-Wswitch-enum", "-Wpadded", "-Wconversion", "-Wmissing-declarations", "-Wmissing-prototypes", "-Wdeclaration-after-statement"
+#ifdef __GNUC__
+#define CHECK_CPU_SUPPORT(FEATURE) __builtin_cpu_supports(FEATURE)
+#endif /* __GNUC__ */
+
+#ifndef CHECK_CPU_SUPPORT
+#define CHECK_CPU_SUPPORT(FEATURE) 0
+#endif /* CHECK_CPU_SUPPORT */
 
 array_dynamic_iter_make(u64, Numbers);
 
@@ -190,10 +197,12 @@ void setup_flags(Flags *flags) {
 RED_DEF bool compile(const char *source_path, const char *output_path, Command *command, bool display) {
   command_insert(command, "gcc", CFLAGS, (void *) 0);
   command_insert(command, source_path, "-o", output_path, (void *) 0);
-  if (1) {
-    command_insert(command, "-mavx512f", (void *) 0);
+  if (flag_fast.value.on) {
+    if (CHECK_CPU_SUPPORT("avx512f")) {
+      command_insert(command, "-mavx512f", (void *) 0);
+    }
+    command_insert(command, "-O3", (void *) 0);
   }
-  if (flag_fast.value.on) command_insert(command, "-O3", (void *) 0);
   if (flag_debug.value.on) command_insert(command, "-ggdb", (void *) 0);
   if (flag_analyze.value.on) command_insert(command, "-fanalyzer", (void *) 0);
   if (flag_sanitize_address.value.on) command_insert(command, "-fsanitize=address", (void *) 0);
