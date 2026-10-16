@@ -26,6 +26,7 @@ enum {
   FLAGS_STRING,
   FLAGS_USE_STRING,
   FLAGS_USE_NUMBER,
+  FLAGS_SUGGEST_ATTRIBUTE_RETURNS_NONNULL,
   FLAGS_FAST,
   FLAGS_DEBUG,
   FLAGS_ANALYZE,
@@ -37,7 +38,7 @@ enum {
   FLAGS_COUNT
 };
 
-static Flag flag_boolean, flag_number, flag_string, flag_use_string, flag_use_number, flag_fast, flag_debug, flag_analyze, flag_rebuild, flag_no_rebuild, flag_sanitize_address, flag_sanitize_undefined, flag_help;
+static Flag flag_boolean, flag_number, flag_string, flag_use_string, flag_use_number, flag_fast, flag_suggest_attribute_returns_nonnull, flag_debug, flag_analyze, flag_rebuild, flag_no_rebuild, flag_sanitize_address, flag_sanitize_undefined, flag_help;
 static Flag *flags_array[FLAGS_COUNT];
 
 int main(int argc, char **argv) {
@@ -171,6 +172,7 @@ void setup_flags(Flags *flags) {
   flag_use_string = flag_make("-us", "--use-string", "Use a string.", REDCOMP_FLAG_TYPE_BOOLEAN, value);
   flag_use_number = flag_make("-un", "--use-number", "Use a number.", REDCOMP_FLAG_TYPE_BOOLEAN, value);
   flag_fast = flag_make("-f", "--fast", "Use optimization when compiling [-O3 flag].", REDCOMP_FLAG_TYPE_BOOLEAN, value);
+  flag_suggest_attribute_returns_nonnull = flag_make("-sarn", "--suggest-attribute-returns-nonnull", "Compile with flag for suggestions for `returns_nonnull` attribute [-Wsuggest-attribute=returns_nonnull].", REDCOMP_FLAG_TYPE_BOOLEAN, value);
   flag_debug = flag_make("-g", "--debug", "Compile with debug information [-g or --ggdb flag].", REDCOMP_FLAG_TYPE_BOOLEAN, value);
   flag_analyze = flag_make("-a", "--analyze", "Enable static analysis during compilation [-fanalyzer].", REDCOMP_FLAG_TYPE_BOOLEAN, value);
   flag_rebuild = flag_make("-rb", "--rebuild", "Force the build system to rebuild itself.", REDCOMP_FLAG_TYPE_BOOLEAN, value);
@@ -184,6 +186,7 @@ void setup_flags(Flags *flags) {
   flags_array[FLAGS_USE_STRING] = &flag_use_string;
   flags_array[FLAGS_USE_NUMBER] = &flag_use_number;
   flags_array[FLAGS_FAST] = &flag_fast;
+  flags_array[FLAGS_SUGGEST_ATTRIBUTE_RETURNS_NONNULL] = &flag_suggest_attribute_returns_nonnull;
   flags_array[FLAGS_DEBUG] = &flag_debug;
   flags_array[FLAGS_ANALYZE] = &flag_analyze;
   flags_array[FLAGS_REBUILD] = &flag_rebuild;
@@ -197,6 +200,9 @@ void setup_flags(Flags *flags) {
 
 RED_DEF bool compile(const char *source_path, const char *output_path, Command *command, bool display) {
   command_insert(command, "gcc", CFLAGS, (void *) 0);
+  if (flag_suggest_attribute_returns_nonnull.value.on) {
+    command_insert(command, "-Wsuggest-attribute=returns_nonnull", (void *) 0);
+  }
   command_insert(command, source_path, "-o", output_path, (void *) 0);
   if (flag_fast.value.on) {
     if (CHECK_CPU_SUPPORT("avx512f")) {
