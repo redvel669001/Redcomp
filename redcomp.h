@@ -16,6 +16,78 @@
 #define REDCOMP_ARENA_DEFAULT_RESERVE 1024
 #endif /* REDCOMP_ARENA_DEFAULT_RESERVE */
 
+#ifdef __GNUC__
+#define REDCOMP_PURE __attribute__ ((pure))
+#define REDCOMP_CONST __attribute__ ((const))
+#define REDCOMP_RETURNS_NONNULL __attribute__ ((returns_nonnull))
+#define REDCOMP_NORETURN __attribute__ ((noreturn))
+
+/*
+  `string_index` - the index of the format string argument (indices
+  start from 1, not 0)
+  `first_to_check` - the index of the first argument that is to be
+  checked against the format string (indices start from 1, not 0)
+*/
+#define REDCOMP_FORMAT(string_index, first_to_check) __attribute__ ((format (printf, (string_index), (first_to_check))))
+
+#define REDCOMP_NONNULL_ONE(first) __attribute__ ((nonnull ((first))))
+#define REDCOMP_NONNULL_TWO(first, second) __attribute__ ((nonnull ((first), (second))))
+#define REDCOMP_NONNULL_THREE(first, second, third) __attribute__ ((nonnull ((first), (second), (third))))
+#define REDCOMP_NONNULL_FOUR(first, second, third, fourth) __attribute__ ((nonnull ((first), (second), (third), (fourth))))
+#define REDCOMP_NONNULL_FIVE(first, second, third, fourth, fifth) __attribute__ ((nonnull ((first), (second), (third), (fourth), (fifth))))
+
+#define REDCOMP_BUILTIN_UNREACHABLE() __builtin_unreachable()
+#define REDCOMP_BUILTIN_STATIC_ASSERT(condition, message) _Static_assert((condition), (message))
+#endif /* __GNUC__ */
+
+#ifndef REDCOMP_PURE
+#define REDCOMP_PURE
+#endif /* REDCOMP_PURE */
+
+#ifndef REDCOMP_CONST
+#define REDCOMP_CONST
+#endif /* REDCOMP_CONST */
+
+#ifndef REDCOMP_RETURNS_NONNULL
+#define REDCOMP_RETURNS_NONNULL
+#endif /* REDCOMP_RETURNS_NONNULL */
+
+#ifndef REDCOMP_NORETURN
+#define REDCOMP_NORETURN
+#endif /* REDCOMP_NORETURN */
+
+#ifndef REDCOMP_FORMAT
+#define REDCOMP_FORMAT(string_index, first_to_check)
+#endif /* REDCOMP_FORMAT */
+
+#ifndef REDCOMP_NONNULL_ONE
+#define REDCOMP_NONNULL_ONE(first)
+#endif /* REDCOMP_NONNULL_ONE */
+
+#ifndef REDCOMP_NONNULL_TWO
+#define REDCOMP_NONNULL_TWO(first, second)
+#endif /* REDCOMP_NONNULL_TWO */
+
+#ifndef REDCOMP_NONNULL_THREE
+#define REDCOMP_NONNULL_THREE(first, second, third)
+#endif /* REDCOMP_NONNULL_THREE */
+
+#ifndef REDCOMP_NONNULL_FOUR
+#define REDCOMP_NONNULL_FOUR(first, second, third, fourth)
+#endif /* REDCOMP_NONNULL_FOUR */
+
+#ifndef REDCOMP_NONNULL_FIVE
+#define REDCOMP_NONNULL_FIVE(first, second, third, fourth, fifth)
+#endif /* REDCOMP_NONNULL_FIVE */
+
+#ifndef REDCOMP_BUILTIN_UNREACHABLE
+#define REDCOMP_BUILTIN_UNREACHABLE()
+#endif /* REDCOMP_BUILTIN_UNREACHABLE */
+
+#ifndef REDCOMP_BUILTIN_STATIC_ASSERT
+#define REDCOMP_BUILTIN_STATIC_ASSERT(condition, message)
+#endif /* REDCOMP_BUILTIN_STATIC_ASSERT */
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -253,7 +325,7 @@ RED_DEF RedcompFlag redcomp_flag_make(const char *name_short, const char *name_l
 RED_DEF bool redcomp_parse_numeric_argument(const char *arg, u64 *result);
 RED_DEF bool redcomp_flags_parse_function(RedcompArgs *args, RedcompFlags *flags, const char *file, i32 line);
 
-RED_DEF u64 redcomp_max_pad_from_max_length(u64 max_length);
+RED_DEF u64 redcomp_max_pad_from_max_length(u64 max_length) REDCOMP_CONST;
 RED_DEF void redcomp_print_usage_function(FILE *output_file, const char *program_name, RedcompFlags *flags, const char *file, i32 line);
 
 #define redcomp_flags_parse(args, flags)                                \
@@ -278,8 +350,8 @@ redcomp_array_dynamic_make(RedcompRegion, RedcompArena);
 */
 
 RED_DEF void redcomp_region_make(RedcompArena *arena, u64 reserve);
-RED_DEF void *redcomp_region_alloc_function(RedcompRegion *region, u64 reserve, const char *file, i32 line);
-RED_DEF void *redcomp_arena_alloc_function(RedcompArena *arena, u64 reserve, const char *file, i32 line);
+RED_DEF void *redcomp_region_alloc_function(RedcompRegion *region, u64 reserve, const char *file, i32 line) REDCOMP_RETURNS_NONNULL;
+RED_DEF void *redcomp_arena_alloc_function(RedcompArena *arena, u64 reserve, const char *file, i32 line) REDCOMP_RETURNS_NONNULL;
 RED_DEF void redcomp_arena_free(RedcompArena *arena);
 
 #define redcomp_arena_alloc(arena, reserve)                             \
@@ -304,8 +376,8 @@ static u64 redcomp_temporary_buffer_cursor;
   ############################################################
 */
 
-RED_DEF const char *redcomp_temporary_format(const char *format, ...);
-RED_DEF u64 redcomp_temporary_buffer_cursor_get(void);
+RED_DEF const char *redcomp_temporary_format(const char *format, ...) REDCOMP_FORMAT(1, 2) REDCOMP_RETURNS_NONNULL;
+RED_DEF u64 redcomp_temporary_buffer_cursor_get(void) REDCOMP_PURE;
 RED_DEF void redcomp_temporary_buffer_cursor_set(u64 cursor);
 
 /*
@@ -338,7 +410,7 @@ RED_DEF void redcomp_string_insert_cstring_sized(RedcompString *redcomp_string, 
 RED_DEF void redcomp_string_insert_string_view(RedcompString *redcomp_string, RedcompStringView string_view);
 RED_DEF void redcomp_string_insert_cstring_unsized(RedcompString *redcomp_string, const char *cstring);
 RED_DEF void redcomp_string_insert_number_function(RedcompString *string, u64 number, const char *file, i32 line);
-RED_DEF void redcomp_string_insert_format_function(RedcompString *string, const char *file, i32 line, const char *format, ...) __attribute__ ((format (printf, 4, 5)));
+RED_DEF void redcomp_string_insert_format_function(RedcompString *string, const char *file, i32 line, const char *format, ...) REDCOMP_FORMAT(4, 5);
 RED_DEF void redcomp_string_insert_format_va_list_function(RedcompString *string, const char *file, i32 line, const char *format, va_list args);
 
 /*
@@ -347,15 +419,15 @@ RED_DEF void redcomp_string_insert_format_va_list_function(RedcompString *string
   ############################################################
 */
 
-RED_DEF bool redcomp_string_view_starts_with_cstring_sized(RedcompStringView string_view, const char *start, u64 size);
-RED_DEF bool redcomp_string_view_starts_with_string_view(RedcompStringView string_view, RedcompStringView start);
-RED_DEF bool redcomp_string_view_starts_with_cstring_unsized(RedcompStringView string_view, const char *start);
+RED_DEF bool redcomp_string_view_starts_with_cstring_sized(RedcompStringView string_view, const char *start, u64 size) REDCOMP_PURE;
+RED_DEF bool redcomp_string_view_starts_with_string_view(RedcompStringView string_view, RedcompStringView start) REDCOMP_PURE;
+RED_DEF bool redcomp_string_view_starts_with_cstring_unsized(RedcompStringView string_view, const char *start) REDCOMP_PURE;
 
 RED_DEF void redcomp_string_view_cut_once(RedcompStringView *string_view);
 RED_DEF void redcomp_string_view_cut(RedcompStringView *string_view, u64 count);
-RED_DEF u64 redcomp_string_view_contains_character(RedcompStringView string_view, char character);
-RED_DEF bool redcomp_string_view_equals(RedcompStringView string_view1, RedcompStringView string_view2);
-RED_DEF RedcompStringView redcomp_string_view_from_cstring_unsized(const char *cstring);
+RED_DEF u64 redcomp_string_view_contains_character(RedcompStringView string_view, char character) REDCOMP_PURE;
+RED_DEF bool redcomp_string_view_equals(RedcompStringView string_view1, RedcompStringView string_view2) REDCOMP_PURE;
+RED_DEF RedcompStringView redcomp_string_view_from_cstring_unsized(const char *cstring) REDCOMP_PURE;
 
 #define redcomp_read_from_file(file_path, buffer)                       \
   redcomp_string_read_from_file_function((file_path), (buffer), __FILE__, __LINE__)
@@ -400,10 +472,10 @@ RED_DEF void redcomp_assert_from_function(bool condition, const char *file, i32 
 #define redcomp_assert_from(condition, origin_file, origin_line, message) \
   redcomp_assert_from_function((condition), __FILE__, __LINE__, (origin_file), (origin_line), (message))
 
-RED_DEF void *redcomp_realloc_wrapper(void *original_pointer, u64 size, const char *file, i32 line);
+RED_DEF void *redcomp_realloc_wrapper(void *original_pointer, u64 size, const char *file, i32 line) REDCOMP_RETURNS_NONNULL;
 
 RED_DEF clock_t redcomp_current_time_get(void);
-RED_DEF double redcomp_elapsed_time_get(clock_t start, clock_t end);
+RED_DEF double redcomp_elapsed_time_get(clock_t start, clock_t end) REDCOMP_CONST;
 RED_DEF void redcomp_elapsed_time_print(clock_t start, clock_t end, const char *subject);
 
 typedef struct {
