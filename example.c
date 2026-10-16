@@ -151,20 +151,6 @@ int main(int argc, char **argv) {
 void setup_flags(Flags *flags) {
   FlagValue value;
   memset(&value, 0, sizeof value);
-  memset(&flag_boolean, 0, sizeof flag_boolean);
-  memset(&flag_number, 0, sizeof flag_number);
-  memset(&flag_string, 0, sizeof flag_string);
-  memset(&flag_use_string, 0, sizeof flag_use_string);
-  memset(&flag_use_number, 0, sizeof flag_use_number);
-  memset(&flag_fast, 0, sizeof flag_fast);
-  memset(&flag_debug, 0, sizeof flag_debug);
-  memset(&flag_analyze, 0, sizeof flag_analyze);
-  memset(&flag_rebuild, 0, sizeof flag_rebuild);
-  memset(&flag_no_rebuild, 0, sizeof flag_no_rebuild);
-  memset(&flag_help, 0, sizeof flag_help);
-  memset(&flag_sanitize_address, 0, sizeof flag_sanitize_address);
-  memset(&flag_sanitize_undefined, 0, sizeof flag_sanitize_undefined);
-  memset(flags_array, 0, sizeof flags_array);
   value.on = true;
   flag_boolean = flag_make("-b", "--boolean", "Boolean flag.", REDCOMP_FLAG_TYPE_BOOLEAN, value);
   memset(&value, 0, sizeof value);
