@@ -305,6 +305,8 @@ typedef enum {
   REDCOMP_FLAG_TYPE_COUNT
 } RedcompFlagType;
 
+REDCOMP_BUILTIN_STATIC_ASSERT(REDCOMP_FLAG_TYPE_COUNT == 3, "Supported flag type count has changed. Update relevant structs and functions accordingly.");
+
 typedef union {
   bool on;
   u64 number;
@@ -320,6 +322,8 @@ typedef struct {
   RedcompFlagValue value;
   RedcompFlagValue default_value;
 } RedcompFlag;
+
+REDCOMP_BUILTIN_STATIC_ASSERT(sizeof(RedcompFlag) == 48, "Flag struct has changed. Update relevant functions accordingly.");
 
 redcomp_array_view_make(RedcompFlag *, RedcompFlags);
 redcomp_array_view_iter_make(const char *, RedcompArgs);
@@ -880,6 +884,8 @@ RED_DEF bool redcomp_parse_numeric_argument(const char *arg, u64 *result) {
   return true;
 }
 
+REDCOMP_BUILTIN_STATIC_ASSERT(REDCOMP_FLAG_TYPE_COUNT == 3, "Supported flag type count has changed. Update relevant structs and functions accordingly.");
+REDCOMP_BUILTIN_STATIC_ASSERT(sizeof(RedcompFlag) == 48, "Flag struct has changed. Update relevant functions accordingly.");
 RED_DEF bool redcomp_flags_parse_function(RedcompArgs *args, RedcompFlags *flags, const char *file, i32 line) {
   size_t i;
   u64 value;
@@ -930,6 +936,8 @@ RED_DEF size_t redcomp_max_pad_from_max_length(size_t max_length) {
   return max_pad;
 }
 
+REDCOMP_BUILTIN_STATIC_ASSERT(REDCOMP_FLAG_TYPE_COUNT == 3, "Supported flag type count has changed. Update relevant structs and functions accordingly.");
+REDCOMP_BUILTIN_STATIC_ASSERT(sizeof(RedcompFlag) == 48, "Flag struct has changed. Update relevant functions accordingly.");
 RED_DEF void redcomp_print_usage_function(FILE *output_file, const char *program_name, RedcompFlags *flags, const char *file, i32 line) {
   RedcompFlag *flag;
   size_t i, length;
