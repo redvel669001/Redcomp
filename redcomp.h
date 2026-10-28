@@ -117,6 +117,7 @@ typedef unsigned short int u16;
 typedef unsigned int u32;
 typedef unsigned long long int u64;
 
+#define I64_FMT "%lld"
 #define U64_FMT "%llu"
 
 typedef long long int RedcompFileSize;
@@ -137,6 +138,7 @@ typedef __uint16_t u16;
 typedef __uint32_t u32;
 typedef __uint64_t u64;
 
+#define I64_FMT "%ld"
 #define U64_FMT "%lu"
 
 typedef __int64_t RedcompFileSize;
