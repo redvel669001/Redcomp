@@ -156,22 +156,22 @@ typedef __int64_t RedcompFileSize;
 
 #define redcomp_array_dynamic_make_inside(type) \
   type *first;                                  \
-  u64 count;                                    \
-  u64 reserved
+  size_t count;                                 \
+  size_t reserved
 
-#define redcomp_array_dynamic_iter_make_inside(type)            \
-  type *first;                                                  \
-  u64 count;                                                    \
-  u64 reserved;                                                 \
+#define redcomp_array_dynamic_iter_make_inside(type)    \
+  type *first;                                          \
+  size_t count;                                         \
+  size_t reserved;                                      \
   type *iter
 
 #define redcomp_array_view_make_inside(type)    \
   type *first;                                  \
-  u64 count
+  size_t count
 
 #define redcomp_array_view_iter_make_inside(type)       \
   type *first;                                          \
-  u64 count;                                            \
+  size_t count;                                         \
   type *iter
 
 #define redcomp_array_dynamic_make(type, name)  \
@@ -237,7 +237,7 @@ typedef __int64_t RedcompFileSize;
 
 #define redcomp_iter_first(array) redcomp_iter_to_index((array), 0)
 
-#define redcomp_iter_get_index(array) (u64) ((array)->iter - (array)->first)
+#define redcomp_iter_get_index(array) (size_t) ((array)->iter - (array)->first)
 
 #define redcomp_iter_next(array) redcomp_iter_to_index((array), redcomp_iter_get_index(array) + 1)
 #define redcomp_iter_forward(array, forward) redcomp_iter_to_index((array), redcomp_iter_get_index(array) + (forward))
@@ -335,7 +335,7 @@ RED_DEF RedcompFlag redcomp_flag_make(const char *name_short, const char *name_l
 RED_DEF bool redcomp_parse_numeric_argument(const char *arg, u64 *result);
 RED_DEF bool redcomp_flags_parse_function(RedcompArgs *args, RedcompFlags *flags, const char *file, i32 line);
 
-RED_DEF u64 redcomp_max_pad_from_max_length(u64 max_length) REDCOMP_CONST;
+RED_DEF size_t redcomp_max_pad_from_max_length(size_t max_length) REDCOMP_CONST;
 RED_DEF void redcomp_print_usage_function(FILE *output_file, const char *program_name, RedcompFlags *flags, const char *file, i32 line);
 
 #define redcomp_flags_parse(args, flags)                                \
@@ -359,9 +359,9 @@ redcomp_array_dynamic_make(RedcompRegion, RedcompArena);
   ############################################################
 */
 
-RED_DEF void redcomp_region_make(RedcompArena *arena, u64 reserve);
-RED_DEF void *redcomp_region_alloc_function(RedcompRegion *region, u64 reserve, const char *file, i32 line) REDCOMP_RETURNS_NONNULL;
-RED_DEF void *redcomp_arena_alloc_function(RedcompArena *arena, u64 reserve, const char *file, i32 line) REDCOMP_RETURNS_NONNULL;
+RED_DEF void redcomp_region_make(RedcompArena *arena, size_t reserve);
+RED_DEF void *redcomp_region_alloc_function(RedcompRegion *region, size_t reserve, const char *file, i32 line) REDCOMP_RETURNS_NONNULL;
+RED_DEF void *redcomp_arena_alloc_function(RedcompArena *arena, size_t reserve, const char *file, i32 line) REDCOMP_RETURNS_NONNULL;
 RED_DEF void redcomp_arena_free(RedcompArena *arena);
 
 #define redcomp_arena_alloc(arena, reserve)                             \
@@ -378,7 +378,7 @@ RED_DEF void redcomp_arena_free(RedcompArena *arena);
 #endif /* REDCOMP_TEMPORARY_BUFFER_SIZE */
 
 static char redcomp_temporary_buffer[REDCOMP_TEMPORARY_BUFFER_SIZE];
-static u64 redcomp_temporary_buffer_cursor;
+static size_t redcomp_temporary_buffer_cursor;
 
 /*
   ############################################################
@@ -387,8 +387,8 @@ static u64 redcomp_temporary_buffer_cursor;
 */
 
 RED_DEF const char *redcomp_temporary_format(const char *format, ...) REDCOMP_FORMAT(1, 2) REDCOMP_RETURNS_NONNULL;
-RED_DEF u64 redcomp_temporary_buffer_cursor_get(void) REDCOMP_PURE;
-RED_DEF void redcomp_temporary_buffer_cursor_set(u64 cursor);
+RED_DEF size_t redcomp_temporary_buffer_cursor_get(void) REDCOMP_PURE;
+RED_DEF void redcomp_temporary_buffer_cursor_set(size_t cursor);
 
 /*
   ############################################################
@@ -416,7 +416,7 @@ redcomp_array_dynamic_make(char, RedcompString);
 RED_DEF bool redcomp_string_read_from_file_function(const char *file_path, RedcompString *buffer, const char *file, i32 line);
 RED_DEF bool redcomp_string_write_to_file_function(const char *file_path, const RedcompString *buffer, const char *file, i32 line);
 
-RED_DEF void redcomp_string_insert_cstring_sized(RedcompString *redcomp_string, const char *cstring, u64 size);
+RED_DEF void redcomp_string_insert_cstring_sized(RedcompString *redcomp_string, const char *cstring, size_t size);
 RED_DEF void redcomp_string_insert_string_view(RedcompString *redcomp_string, RedcompStringView string_view);
 RED_DEF void redcomp_string_insert_cstring_unsized(RedcompString *redcomp_string, const char *cstring);
 RED_DEF void redcomp_string_insert_number_function(RedcompString *string, u64 number, const char *file, i32 line);
@@ -429,13 +429,13 @@ RED_DEF void redcomp_string_insert_format_va_list_function(RedcompString *string
   ############################################################
 */
 
-RED_DEF bool redcomp_string_view_starts_with_cstring_sized(RedcompStringView string_view, const char *start, u64 size) REDCOMP_PURE;
+RED_DEF bool redcomp_string_view_starts_with_cstring_sized(RedcompStringView string_view, const char *start, size_t size) REDCOMP_PURE;
 RED_DEF bool redcomp_string_view_starts_with_string_view(RedcompStringView string_view, RedcompStringView start) REDCOMP_PURE;
 RED_DEF bool redcomp_string_view_starts_with_cstring_unsized(RedcompStringView string_view, const char *start) REDCOMP_PURE;
 
 RED_DEF void redcomp_string_view_cut_once(RedcompStringView *string_view);
-RED_DEF void redcomp_string_view_cut(RedcompStringView *string_view, u64 count);
-RED_DEF u64 redcomp_string_view_contains_character(RedcompStringView string_view, char character) REDCOMP_PURE;
+RED_DEF void redcomp_string_view_cut(RedcompStringView *string_view, size_t count);
+RED_DEF size_t redcomp_string_view_contains_character(RedcompStringView string_view, char character) REDCOMP_PURE;
 RED_DEF bool redcomp_string_view_equals(RedcompStringView string_view1, RedcompStringView string_view2) REDCOMP_PURE;
 RED_DEF RedcompStringView redcomp_string_view_from_cstring_unsized(const char *cstring) REDCOMP_PURE;
 
@@ -455,7 +455,7 @@ RED_DEF RedcompStringView redcomp_string_view_from_cstring_unsized(const char *c
 */
 
 RED_DEF bool redcomp_program_needs_rebuild_function(const char *program_path, const char *source_path, const char *file, i32 line);
-RED_DEF bool redcomp_program_needs_rebuild_multiple_sources_function(const char *program_path, const char **sources_paths, u64 sources_count, const char *file, i32 line);
+RED_DEF bool redcomp_program_needs_rebuild_multiple_sources_function(const char *program_path, const char **sources_paths, size_t sources_count, const char *file, i32 line);
 RED_DEF bool redcomp_file_time_get_function(const char *file_path, time_t *file_time, const char *file, i32 line);
 
 #define redcomp_program_needs_rebuild(program_path, source_path)        \
@@ -482,7 +482,7 @@ RED_DEF void redcomp_assert_from_function(bool condition, const char *file, i32 
 #define redcomp_assert_from(condition, origin_file, origin_line, message) \
   redcomp_assert_from_function((condition), __FILE__, __LINE__, (origin_file), (origin_line), (message))
 
-RED_DEF void *redcomp_realloc_wrapper(void *original_pointer, u64 size, const char *file, i32 line) REDCOMP_RETURNS_NONNULL;
+RED_DEF void *redcomp_realloc_wrapper(void *original_pointer, size_t size, const char *file, i32 line) REDCOMP_RETURNS_NONNULL;
 
 RED_DEF clock_t redcomp_current_time_get(void);
 RED_DEF double redcomp_elapsed_time_get(clock_t start, clock_t end) REDCOMP_CONST;
@@ -524,10 +524,10 @@ typedef struct {
   u64 bytes[2];
 } RedcompBytes16;
 
-RED_DEF void redcomp_string_copy(char *destination, const char *source, u64 size);
-RED_DEF void redcomp_string_set(char *destination, u8 byte, u64 size);
-RED_DEF void redcomp_memory_copy(void *destination, const void *source, u64 size);
-RED_DEF void redcomp_memory_set(void *destination, u8 byte, u64 size);
+RED_DEF void redcomp_string_copy(char *destination, const char *source, size_t size);
+RED_DEF void redcomp_string_set(char *destination, u8 byte, size_t size);
+RED_DEF void redcomp_memory_copy(void *destination, const void *source, size_t size);
+RED_DEF void redcomp_memory_set(void *destination, u8 byte, size_t size);
 
 #ifndef REDCOMP_KEEP_PREFIXES
 /*
@@ -754,7 +754,7 @@ RED_DEF void redcomp_assert_from_function(bool condition, const char *file, i32 
   abort();
 }
 
-RED_DEF void *redcomp_realloc_wrapper(void *original_pointer, u64 new_size, const char *file, i32 line) {
+RED_DEF void *redcomp_realloc_wrapper(void *original_pointer, size_t new_size, const char *file, i32 line) {
   void *new_pointer;
   new_pointer = realloc(original_pointer, new_size);
   redcomp_assert_from(new_pointer != (void *) 0, file, line, "Allocation failed");
@@ -781,7 +781,7 @@ RED_DEF void redcomp_command_insert(RedcompCommand *command, ...) {
 }
 
 RED_DEF void redcomp_command_display(const RedcompCommand *command) {
-  u64 i;
+  size_t i;
   const char *arg;
   printf("[COMMAND] ");
   for (i = 0; i < command->count; i++) {
@@ -866,7 +866,7 @@ RED_DEF RedcompFlag redcomp_flag_make(const char *name_short, const char *name_l
 }
 
 RED_DEF bool redcomp_parse_numeric_argument(const char *arg, u64 *result) {
-  u64 i;
+  size_t i;
   char c;
   *result = 0;
   for (i = 0; i < strlen(arg); i++) {
@@ -881,7 +881,8 @@ RED_DEF bool redcomp_parse_numeric_argument(const char *arg, u64 *result) {
 }
 
 RED_DEF bool redcomp_flags_parse_function(RedcompArgs *args, RedcompFlags *flags, const char *file, i32 line) {
-  u64 i, value;
+  size_t i;
+  u64 value;
   RedcompFlag *flag;
   if (!redcomp_iter_first(args)) return false;
   do {
@@ -920,8 +921,8 @@ RED_DEF bool redcomp_flags_parse_function(RedcompArgs *args, RedcompFlags *flags
   return true;
 }
 
-RED_DEF u64 redcomp_max_pad_from_max_length(u64 max_length) {
-  u64 max_pad, max_pad_rem;
+RED_DEF size_t redcomp_max_pad_from_max_length(size_t max_length) {
+  size_t max_pad, max_pad_rem;
   max_pad = max_length;
   max_pad_rem = max_pad % 4;
   if (max_pad_rem != 0) max_pad += (4 - max_pad_rem);
@@ -931,10 +932,10 @@ RED_DEF u64 redcomp_max_pad_from_max_length(u64 max_length) {
 
 RED_DEF void redcomp_print_usage_function(FILE *output_file, const char *program_name, RedcompFlags *flags, const char *file, i32 line) {
   RedcompFlag *flag;
-  u64 i, length;
-  u64 name_short_max_length, name_long_max_length;
-  u64 name_short_max_pad, name_long_max_pad;
-  u64 name_short_pad, name_long_pad;
+  size_t i, length;
+  size_t name_short_max_length, name_long_max_length;
+  size_t name_short_max_pad, name_long_max_pad;
+  size_t name_short_pad, name_long_pad;
 
   length = 0;
   name_short_max_length = 0;
@@ -1017,7 +1018,7 @@ RED_DEF void redcomp_print_usage_function(FILE *output_file, const char *program
   ############################################################
 */
 
-RED_DEF void redcomp_region_make(RedcompArena *arena, u64 reserve) {
+RED_DEF void redcomp_region_make(RedcompArena *arena, size_t reserve) {
   RedcompRegion region;
   memset(&region, 0, sizeof region);
   region.reserved = REDCOMP_ARENA_DEFAULT_RESERVE;
@@ -1026,7 +1027,7 @@ RED_DEF void redcomp_region_make(RedcompArena *arena, u64 reserve) {
   redcomp_array_insert(arena, region);
 }
 
-RED_DEF void *redcomp_region_alloc_function(RedcompRegion *region, u64 reserve, const char *file, i32 line) {
+RED_DEF void *redcomp_region_alloc_function(RedcompRegion *region, size_t reserve, const char *file, i32 line) {
   void *result;
   redcomp_assert_from(region->count + reserve <= region->reserved, file, line, "Unreachable.");
   redcomp_assert_from(region->first != (void *) 0, file, line, "Cannot allocate in a region pointing to null.");
@@ -1035,8 +1036,8 @@ RED_DEF void *redcomp_region_alloc_function(RedcompRegion *region, u64 reserve, 
   return result;
 }
 
-RED_DEF void *redcomp_arena_alloc_function(RedcompArena *arena, u64 reserve, const char *file, i32 line) {
-  u64 i;
+RED_DEF void *redcomp_arena_alloc_function(RedcompArena *arena, size_t reserve, const char *file, i32 line) {
+  size_t i;
   RedcompRegion *region;
   for (i = 0; i < arena->count; i++) {
     region = arena->first + i;
@@ -1050,7 +1051,7 @@ RED_DEF void *redcomp_arena_alloc_function(RedcompArena *arena, u64 reserve, con
 }
 
 RED_DEF void redcomp_arena_free(RedcompArena *arena) {
-  u64 i;
+  size_t i;
   RedcompRegion region;
   memset(&region, 0, sizeof region);
   for (i = 0; i < arena->count; i++) {
@@ -1069,13 +1070,13 @@ RED_DEF void redcomp_arena_free(RedcompArena *arena) {
 
 RED_DEF const char *redcomp_temporary_format(const char *format, ...) {
   va_list args;
-  u64 n;
+  size_t n;
   const char *result;
 
   result = redcomp_temporary_buffer + redcomp_temporary_buffer_cursor;
 
   va_start(args, format);
-  n = (u64) vsprintf(redcomp_temporary_buffer + redcomp_temporary_buffer_cursor, format, args);
+  n = (size_t) vsprintf(redcomp_temporary_buffer + redcomp_temporary_buffer_cursor, format, args);
   redcomp_assert(REDCOMP_TEMPORARY_BUFFER_SIZE > redcomp_temporary_buffer_cursor + n + 1, "Temporary buffer overrun.");
   va_end(args);
 
@@ -1083,11 +1084,11 @@ RED_DEF const char *redcomp_temporary_format(const char *format, ...) {
   return result;
 }
 
-RED_DEF u64 redcomp_temporary_buffer_cursor_get(void) {
+RED_DEF size_t redcomp_temporary_buffer_cursor_get(void) {
   return redcomp_temporary_buffer_cursor;
 }
 
-RED_DEF void redcomp_temporary_buffer_cursor_set(u64 cursor) {
+RED_DEF void redcomp_temporary_buffer_cursor_set(size_t cursor) {
   redcomp_temporary_buffer_cursor = cursor;
 }
 
@@ -1119,8 +1120,8 @@ RED_DEF bool redcomp_string_read_from_file_function(const char *file_path, Redco
     return false;
   }
 
-  buffer->reserved = (u64) file_size;
-  buffer->first = malloc((u64) file_size);
+  buffer->reserved = (size_t) file_size;
+  buffer->first = malloc((size_t) file_size);
   if (buffer->first == (void *) 0) {
     fprintf(stderr, "%s:%d: error: malloc failed!\n", file, line);
     fclose(input_file);
@@ -1128,7 +1129,7 @@ RED_DEF bool redcomp_string_read_from_file_function(const char *file_path, Redco
   }
 
   fseek(input_file, 0, SEEK_SET);
-  if (fread(buffer->first, (u64) file_size, 1, input_file) == 0) {
+  if (fread(buffer->first, (size_t) file_size, 1, input_file) == 0) {
     fprintf(stderr, "%s:%d: error: could not read file `%s`. Either was an error, or the file was empty.\n", file, line, file_path);
   }
   buffer->count = buffer->reserved;
@@ -1163,7 +1164,7 @@ RED_DEF bool redcomp_string_write_to_file_function(const char *file_path, const 
   return true;
 }
 
-RED_DEF void redcomp_string_insert_cstring_sized(RedcompString *redcomp_string, const char *cstring, u64 size) {
+RED_DEF void redcomp_string_insert_cstring_sized(RedcompString *redcomp_string, const char *cstring, size_t size) {
   redcomp_array_reserve(redcomp_string, redcomp_string->count + size);
   memcpy(redcomp_string->first + redcomp_string->count, cstring, size);
   redcomp_string->count += size;
@@ -1180,17 +1181,17 @@ RED_DEF void redcomp_string_insert_cstring_unsized(RedcompString *redcomp_string
 RED_DEF void redcomp_string_insert_number_function(RedcompString *string, u64 number, const char *file, i32 line) {
 #define NUMBER_BUFFER_LENGTH 20
   char buffer[NUMBER_BUFFER_LENGTH];
-  int count;
+  size_t count;
   char digit;
   memset(buffer, 0, sizeof buffer);
   count = NUMBER_BUFFER_LENGTH;
   do {
-    redcomp_assert_from(count > -1, file, line, "Invalid memory access.");
+    redcomp_assert_from(count > 0, file, line, "Invalid memory access.");
     digit = (char) (number % 10);
     buffer[--count] = (char) (digit + '0');
     number /= 10;
   } while (number);
-  redcomp_string_insert_cstring_sized(string, buffer + count, NUMBER_BUFFER_LENGTH - (u64) count);
+  redcomp_string_insert_cstring_sized(string, buffer + count, NUMBER_BUFFER_LENGTH - count);
 }
 
 RED_DEF void redcomp_string_insert_format_function(RedcompString *string, const char *file, i32 line, const char *format, ...) {
@@ -1203,7 +1204,8 @@ RED_DEF void redcomp_string_insert_format_function(RedcompString *string, const 
 RED_DEF void redcomp_string_insert_format_va_list_function(RedcompString *string, const char *file, i32 line, const char *format, va_list args) {
   const char *string_arg;
   const char *current;
-  u64 string_arg_size, number_arg, current_length;
+  size_t string_arg_size, current_length;
+  u64 number_arg;
   i64 signed_number_arg;
   char cursor, char_arg;
   bool arg_is_signed_number, arg_is_number, arg_is_character;
@@ -1269,7 +1271,7 @@ RED_DEF void redcomp_string_insert_format_va_list_function(RedcompString *string
           if (format < end) cursor = *format;
           format++;
           if (cursor == 's') {
-            string_arg_size = (u64) va_arg(args, i32);
+            string_arg_size = (size_t) va_arg(args, i32);
             string_arg = va_arg(args, const char *);
             arg_is_cstring_sized = true;
           }
@@ -1287,7 +1289,7 @@ RED_DEF void redcomp_string_insert_format_va_list_function(RedcompString *string
             if (signed_number_arg < 0) {
               signed_number_arg *= -1;
             }
-            string_arg_size = (u64) signed_number_arg;
+            string_arg_size = (size_t) signed_number_arg;
             string_arg = va_arg(args, const char *);
             arg_is_cstring_unsized = true;
             pad_left = true;
@@ -1305,7 +1307,7 @@ RED_DEF void redcomp_string_insert_format_va_list_function(RedcompString *string
           } else {
             pad_left = true;
           }
-          string_arg_size = (u64) signed_number_arg;
+          string_arg_size = (size_t) signed_number_arg;
           if (string_arg_size >= strlen(string_arg)) {
             string_arg_size -= strlen(string_arg);
           } else {
@@ -1368,7 +1370,7 @@ RED_DEF void redcomp_string_insert_format_va_list_function(RedcompString *string
   ############################################################
 */
 
-RED_DEF bool redcomp_string_view_starts_with_cstring_sized(RedcompStringView string_view, const char *start, u64 size) {
+RED_DEF bool redcomp_string_view_starts_with_cstring_sized(RedcompStringView string_view, const char *start, size_t size) {
   const char *save;
   save = string_view.first;
   if (string_view.count < size) return false;
@@ -1390,12 +1392,12 @@ RED_DEF void redcomp_string_view_cut_once(RedcompStringView *string_view) {
   redcomp_array_cut_once(string_view);
 }
 
-RED_DEF void redcomp_string_view_cut(RedcompStringView *string_view, u64 count) {
+RED_DEF void redcomp_string_view_cut(RedcompStringView *string_view, size_t count) {
   redcomp_array_cut(string_view, count);
 }
 
-RED_DEF u64 redcomp_string_view_contains_character(RedcompStringView string_view, char character) {
-  u64 i;
+RED_DEF size_t redcomp_string_view_contains_character(RedcompStringView string_view, char character) {
+  size_t i;
   for (i = 0; i < string_view.count; i++) {
     if (string_view.first[i] == character) break;
   }
@@ -1425,11 +1427,11 @@ RED_DEF bool redcomp_program_needs_rebuild_function(const char *program_path, co
   return redcomp_program_needs_rebuild_multiple_sources_function(program_path, &source_path, 1, file, line);
 }
 
-RED_DEF bool redcomp_program_needs_rebuild_multiple_sources_function(const char *program_path, const char **sources_paths, u64 sources_count, const char *file, i32 line) {
+RED_DEF bool redcomp_program_needs_rebuild_multiple_sources_function(const char *program_path, const char **sources_paths, size_t sources_count, const char *file, i32 line) {
   time_t source_modified;
   time_t last_modified;
   time_t program_modified;
-  u64 i;
+  size_t i;
 
   source_modified = 0;
   last_modified = 0;
@@ -1481,7 +1483,7 @@ RED_DEF void redcomp_elapsed_time_print(clock_t start, clock_t end, const char *
   printf("\n%s: %.10f\n", subject, redcomp_elapsed_time_get(start, end));
 }
 
-RED_DEF void redcomp_string_copy(char *destination, const char *source, u64 size) {
+RED_DEF void redcomp_string_copy(char *destination, const char *source, size_t size) {
   while (size / 4096) {
     *(RedcompBytes4096 *) destination = *(const RedcompBytes4096 *) source;
     destination += 4096;
@@ -1571,7 +1573,7 @@ RED_DEF void redcomp_string_copy(char *destination, const char *source, u64 size
   }
 }
 
-RED_DEF void redcomp_string_set(char *destination, u8 byte, u64 size) {
+RED_DEF void redcomp_string_set(char *destination, u8 byte, size_t size) {
   RedcompBytes64 bytes;
   u64 value;
   value = (u64) byte << 56 | (u64) byte << 48 | (u64) byte << 40 | (u64) byte << 32 | (u64) byte << 24 | (u64) byte << 16 | (u64) byte << 8 | byte;
@@ -1625,11 +1627,11 @@ RED_DEF void redcomp_string_set(char *destination, u8 byte, u64 size) {
   }
 }
 
-RED_DEF void redcomp_memory_copy(void *destination, const void *source, u64 size) {
+RED_DEF void redcomp_memory_copy(void *destination, const void *source, size_t size) {
     redcomp_string_copy(destination, source, size);
 }
 
-RED_DEF void redcomp_memory_set(void *destination, u8 byte, u64 size) {
+RED_DEF void redcomp_memory_set(void *destination, u8 byte, size_t size) {
   redcomp_string_set(destination, byte, size);
 }
 
