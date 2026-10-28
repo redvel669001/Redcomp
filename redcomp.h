@@ -119,6 +119,10 @@ typedef unsigned long long int u64;
 
 #define U64_FMT "%llu"
 
+typedef long long int RedcompFileSize;
+
+#define REDCOMP_FILE_SIZE_FMT "%lld"
+
 #endif /* __WIN32 */
 
 #if defined(__linux__)
@@ -134,6 +138,10 @@ typedef __uint32_t u32;
 typedef __uint64_t u64;
 
 #define U64_FMT "%lu"
+
+typedef __int64_t RedcompFileSize;
+
+#define REDCOMP_FILE_SIZE_FMT "%ld"
 
 #endif /* __linux__ */
 
@@ -1088,7 +1096,7 @@ RED_DEF void redcomp_temporary_buffer_cursor_set(u64 cursor) {
 */
 
 RED_DEF bool redcomp_string_read_from_file_function(const char *file_path, RedcompString *buffer, const char *file, i32 line) {
-  i64 file_size;
+  RedcompFileSize file_size;
   FILE *input_file;
   input_file = fopen(file_path, "rb");
   if (input_file == (void *) 0) {
