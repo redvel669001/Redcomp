@@ -147,6 +147,29 @@ typedef __int64_t RedcompFileSize;
 
 #endif /* __linux__ */
 
+/*
+  Fallback for offsetof.
+*/
+#define REDCOMP_OFFSET_OF_FALLBACK(type, member) \
+  (size_t) &((type *) (0))->member
+
+#ifndef REDCOMP_OFFSET_OF
+#ifdef offsetof
+#define REDCOMP_OFFSET_OF offsetof
+#endif /* offsetof */
+#endif /* REDCOMP_OFFSET_OF */
+
+#ifndef REDCOMP_OFFSET_OF
+#define REDCOMP_OFFSET_OF REDCOMP_OFFSET_OF_FALLBACK
+#endif /* REDCOMP_OFFSET_OF */
+
+
+/*
+  For calculating the size of a member variable. Could be useful for
+  static assertions.
+*/
+#define REDCOMP_SIZE_OF_MEMBER(type, member)     \
+  sizeof ((type *)0)->member
 
 /*
   ############################################################
