@@ -363,7 +363,7 @@ RED_DEF RedcompFlag redcomp_flag_make_mandatory(const char *name_short, const ch
 
 RED_DEF bool redcomp_parse_numeric_argument(const char *arg, u64 *result);
 RED_DEF bool redcomp_flags_parse_function(RedcompArgs *args, RedcompFlags *flags, const char *file, i32 line);
-RED_DEF bool redcomp_flags_check_for_mandatory_flags(const RedcompFlags *flags);
+RED_DEF bool redcomp_flags_check_for_mandatory_flags(const RedcompFlags *flags, bool log_errors);
 
 RED_DEF size_t redcomp_max_pad_from_max_length(size_t max_length) REDCOMP_CONST;
 RED_DEF void redcomp_print_usage_function(FILE *output_file, const char *program_name, RedcompFlags *flags, const char *file, i32 line);
@@ -970,15 +970,21 @@ RED_DEF bool redcomp_flags_parse_function(RedcompArgs *args, RedcompFlags *flags
   return true;
 }
 
-RED_DEF bool redcomp_flags_check_for_mandatory_flags(const RedcompFlags *flags) {
+RED_DEF bool redcomp_flags_check_for_mandatory_flags(const RedcompFlags *flags, bool log_errors) {
   size_t i;
   const RedcompFlag *flag;
+  bool result;
+  result = true;
   for (i = 0; i < flags->count; i++) {
     flag = flags->first[i];
     if (!flag->mandatory) continue;
-    if (!flag->parsed) return false;
+    if (!flag->parsed) {
+      if (!log_errors) return false;
+      fprintf(stderr, "Error: flag `%s` | `%s` is mandatory!\n", flag->name_short, flag->name_long);
+      result = false;
+    }
   }
-  return true;
+  return result;
 }
 
 RED_DEF size_t redcomp_max_pad_from_max_length(size_t max_length) {
