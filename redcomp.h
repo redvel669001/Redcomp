@@ -1,7 +1,6 @@
 #ifndef REDCOMP_H_
 #define REDCOMP_H_
 
-/* TODO: add support for mandatory flags. */
 /* TODO: add support for more flag types. */
 
 #ifndef RED_DEF
@@ -341,12 +340,14 @@ typedef struct {
   const char *name_long;
   const char *description;
   RedcompFlagType type;
-  bool parsed, padding[3];
+  bool parsed, mandatory, padding[2];
   RedcompFlagValue value;
   RedcompFlagValue default_value;
 } RedcompFlag;
 
 REDCOMP_BUILTIN_STATIC_ASSERT(sizeof(RedcompFlag) == 48, "Flag struct has changed. Update relevant functions accordingly.");
+REDCOMP_BUILTIN_STATIC_ASSERT(REDCOMP_OFFSET_OF(RedcompFlag, padding) == 30, "Flag struct has changed. Update relevant functions accordingly.");
+REDCOMP_BUILTIN_STATIC_ASSERT(REDCOMP_SIZE_OF_MEMBER(RedcompFlag, padding) == 2, "Flag struct has changed. Update relevant functions accordingly.");
 
 redcomp_array_view_make(RedcompFlag *, RedcompFlags);
 redcomp_array_view_iter_make(const char *, RedcompArgs);
@@ -358,9 +359,11 @@ redcomp_array_view_iter_make(const char *, RedcompArgs);
 */
 
 RED_DEF RedcompFlag redcomp_flag_make(const char *name_short, const char *name_long, const char *description, RedcompFlagType type, RedcompFlagValue default_value);
+RED_DEF RedcompFlag redcomp_flag_make_mandatory(const char *name_short, const char *name_long, const char *description, RedcompFlagType type, RedcompFlagValue default_value);
 
 RED_DEF bool redcomp_parse_numeric_argument(const char *arg, u64 *result);
 RED_DEF bool redcomp_flags_parse_function(RedcompArgs *args, RedcompFlags *flags, const char *file, i32 line);
+RED_DEF bool redcomp_flags_check_for_mandatory_flags(const RedcompFlags *flags);
 
 RED_DEF size_t redcomp_max_pad_from_max_length(size_t max_length) REDCOMP_CONST;
 RED_DEF void redcomp_print_usage_function(FILE *output_file, const char *program_name, RedcompFlags *flags, const char *file, i32 line);
@@ -638,9 +641,11 @@ RED_DEF void redcomp_memory_set(void *destination, u8 byte, size_t size);
 */
 
 #define flag_make redcomp_flag_make
+#define flag_make_mandatory redcomp_flag_make_mandatory
 
 #define parse_numeric_argument redcomp_parse_numeric_argument
 #define flags_parse_function redcomp_flags_parse_function
+#define flags_check_for_mandatory_flags redcomp_flags_check_for_mandatory_flags
 #define max_pad_from_max_length redcomp_max_pad_from_max_length
 #define print_usage_function redcomp_print_usage_function
 
@@ -888,6 +893,19 @@ RED_DEF RedcompFlag redcomp_flag_make(const char *name_short, const char *name_l
   flag.name_long = name_long;
   flag.description = description;
   flag.type = type;
+  flag.mandatory = false;
+  flag.default_value = default_value;
+  return flag;
+}
+
+RED_DEF RedcompFlag redcomp_flag_make_mandatory(const char *name_short, const char *name_long, const char *description, RedcompFlagType type, RedcompFlagValue default_value) {
+  RedcompFlag flag;
+  memset(&flag, 0, sizeof flag);
+  flag.name_short = name_short;
+  flag.name_long = name_long;
+  flag.description = description;
+  flag.type = type;
+  flag.mandatory = true;
   flag.default_value = default_value;
   return flag;
 }
@@ -909,6 +927,8 @@ RED_DEF bool redcomp_parse_numeric_argument(const char *arg, u64 *result) {
 
 REDCOMP_BUILTIN_STATIC_ASSERT(REDCOMP_FLAG_TYPE_COUNT == 3, "Supported flag type count has changed. Update relevant structs and functions accordingly.");
 REDCOMP_BUILTIN_STATIC_ASSERT(sizeof(RedcompFlag) == 48, "Flag struct has changed. Update relevant functions accordingly.");
+REDCOMP_BUILTIN_STATIC_ASSERT(REDCOMP_OFFSET_OF(RedcompFlag, padding) == 30, "Flag struct has changed. Update relevant functions accordingly.");
+REDCOMP_BUILTIN_STATIC_ASSERT(REDCOMP_SIZE_OF_MEMBER(RedcompFlag, padding) == 2, "Flag struct has changed. Update relevant functions accordingly.");
 RED_DEF bool redcomp_flags_parse_function(RedcompArgs *args, RedcompFlags *flags, const char *file, i32 line) {
   size_t i;
   u64 value;
@@ -950,6 +970,17 @@ RED_DEF bool redcomp_flags_parse_function(RedcompArgs *args, RedcompFlags *flags
   return true;
 }
 
+RED_DEF bool redcomp_flags_check_for_mandatory_flags(const RedcompFlags *flags) {
+  size_t i;
+  const RedcompFlag *flag;
+  for (i = 0; i < flags->count; i++) {
+    flag = flags->first[i];
+    if (!flag->mandatory) continue;
+    if (!flag->parsed) return false;
+  }
+  return true;
+}
+
 RED_DEF size_t redcomp_max_pad_from_max_length(size_t max_length) {
   size_t max_pad, max_pad_rem;
   max_pad = max_length;
@@ -961,6 +992,8 @@ RED_DEF size_t redcomp_max_pad_from_max_length(size_t max_length) {
 
 REDCOMP_BUILTIN_STATIC_ASSERT(REDCOMP_FLAG_TYPE_COUNT == 3, "Supported flag type count has changed. Update relevant structs and functions accordingly.");
 REDCOMP_BUILTIN_STATIC_ASSERT(sizeof(RedcompFlag) == 48, "Flag struct has changed. Update relevant functions accordingly.");
+REDCOMP_BUILTIN_STATIC_ASSERT(REDCOMP_OFFSET_OF(RedcompFlag, padding) == 30, "Flag struct has changed. Update relevant functions accordingly.");
+REDCOMP_BUILTIN_STATIC_ASSERT(REDCOMP_SIZE_OF_MEMBER(RedcompFlag, padding) == 2, "Flag struct has changed. Update relevant functions accordingly.");
 RED_DEF void redcomp_print_usage_function(FILE *output_file, const char *program_name, RedcompFlags *flags, const char *file, i32 line) {
   RedcompFlag *flag;
   size_t i, length;
@@ -1016,6 +1049,7 @@ RED_DEF void redcomp_print_usage_function(FILE *output_file, const char *program
               flag->name_long, (i32) name_long_pad, "");
       fprintf(output_file, "    %s\n", flag->description);
       fprintf(output_file, "    Default value: %s.\n", flag->default_value.on ? "true" : "false");
+      fprintf(output_file, "    Mandatory: %s.\n", flag->mandatory ? "true" : "false");
       break;
     case REDCOMP_FLAG_TYPE_NUMBER:
       name_short_pad -= strlen(" <number>");
@@ -1025,6 +1059,7 @@ RED_DEF void redcomp_print_usage_function(FILE *output_file, const char *program
               flag->name_long, (i32) name_long_pad, "");
       fprintf(output_file, "    %s\n", flag->description);
       fprintf(output_file, "    Default value: " U64_FMT ".\n", flag->default_value.number);
+      fprintf(output_file, "    Mandatory: %s.\n", flag->mandatory ? "true" : "false");
       break;
     case REDCOMP_FLAG_TYPE_STRING:
       name_short_pad -= strlen(" <string>");
@@ -1034,6 +1069,7 @@ RED_DEF void redcomp_print_usage_function(FILE *output_file, const char *program
               flag->name_long, (i32) name_long_pad, "");
       fprintf(output_file, "    %s\n", flag->description);
       fprintf(output_file, "    Default value: %s.\n", flag->default_value.string);
+      fprintf(output_file, "    Mandatory: %s.\n", flag->mandatory ? "true" : "false");
       break;
     case REDCOMP_FLAG_TYPE_COUNT: default:
       redcomp_assert_from(false, file, line, "Unreachable.");
